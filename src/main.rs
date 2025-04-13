@@ -25,7 +25,13 @@ fn main() {
 }
 
 fn spawn_camera(mut commands: Commands) -> () {
-    commands.spawn(Camera2d);
+    commands.spawn((
+        Camera2d,
+        Projection::from(OrthographicProjection {
+            scale: 0.75,
+            ..OrthographicProjection::default_2d()
+        }),
+    ));
 }
 
 fn spawn_floor(
