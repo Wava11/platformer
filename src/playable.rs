@@ -1,5 +1,5 @@
 use avian2d::{math::Scalar, prelude::*};
-use bevy::prelude::*;
+use bevy::{math::VectorSpace, prelude::*};
 
 pub struct PlayablePlugin;
 impl Plugin for PlayablePlugin {
@@ -62,7 +62,7 @@ fn move_playable(
     }
 }
 const MOVE_SPEED: f32 = 30000.;
-const MAX_X_SPEED: f32 = 200.;
+const MAX_X_SPEED: f32 = 300.;
 const JUMP_SPEED: f32 = 500.;
 const FRICTION: f32 = 10.;
 
@@ -97,9 +97,11 @@ pub struct Playable;
 #[derive(Component)]
 struct MovementDampingFactor(f32);
 
-fn apply_movement_damping(mut query: Query<(&MovementDampingFactor, &mut LinearVelocity)>) {
-    for (damping_factor, mut linear_velocity) in &mut query {
-        linear_velocity.x *= if linear_velocity.x.abs() > 190. {
+fn apply_movement_damping(
+    mut query: Query<(&MovementDampingFactor, &mut LinearVelocity, &Grounded)>,
+) {
+    for (damping_factor, mut linear_velocity, grounded) in &mut query {
+        linear_velocity.x *= if !grounded.0 || linear_velocity.x.abs() > 190. {
             damping_factor.0
         } else {
             0.
@@ -111,13 +113,14 @@ fn apply_movement_damping(mut query: Query<(&MovementDampingFactor, &mut LinearV
 struct Grounded(bool);
 
 fn update_grounded(
-    mut query: Query<(&mut Grounded, &CollidingEntities, &Transform)>,
-    transform_query: Query<&Transform>,
+    mut query: Query<(&mut Grounded, &CollidingEntities, &Collider, &Transform)>,
+    transform_query: Query<(&Transform, &Collider)>,
 ) {
-    for (mut grounded, hits, transform) in query.iter_mut() {
+    for (mut grounded, hits, collider, transform) in query.iter_mut() {
+        grounded.0 = false;
         for hit in hits.iter() {
-            let hit = transform_query.get(*hit).unwrap();
-            grounded.0 = hit.translation.y < transform.translation.y;
+            let (hit_tranform, hit_collider) = transform_query.get(*hit).unwrap();
+            grounded.0 = hit_tranform.translation.y < transform.translation.y;
         }
     }
 }

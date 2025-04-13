@@ -20,7 +20,7 @@ fn main() {
             PlayablePlugin,
         ))
         .insert_resource(Gravity(Vec2::NEG_Y * 1000.))
-        .add_systems(Startup, (spawn_camera, spawn_floor))
+        .add_systems(Startup, (spawn_camera, spawn_floor, spawn_platforms))
         .run();
 }
 
@@ -44,6 +44,34 @@ fn spawn_floor(
         Mesh2d(meshes.add(Rectangle::new(dimensions.0, dimensions.1))),
         MeshMaterial2d(materials.add(Color::srgb(0., 1., 0.))),
         Transform::from_xyz(0., -400., 0.),
+        RigidBody::Static,
+        Collider::rectangle(dimensions.0, dimensions.1),
+    ));
+}
+fn spawn_platforms(
+    mut commands: Commands,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<ColorMaterial>>,
+) {
+    let dimensions = (300., 30.);
+    commands.spawn((
+        Mesh2d(meshes.add(Rectangle::new(dimensions.0, dimensions.1))),
+        MeshMaterial2d(materials.add(Color::srgb(0., 1., 0.))),
+        Transform::from_xyz(-100., -300., 0.),
+        RigidBody::Static,
+        Collider::rectangle(dimensions.0, dimensions.1),
+    ));
+    commands.spawn((
+        Mesh2d(meshes.add(Rectangle::new(dimensions.0, dimensions.1))),
+        MeshMaterial2d(materials.add(Color::srgb(0., 1., 0.))),
+        Transform::from_xyz(0., -200., 0.),
+        RigidBody::Static,
+        Collider::rectangle(dimensions.0, dimensions.1),
+    ));
+    commands.spawn((
+        Mesh2d(meshes.add(Rectangle::new(dimensions.0, dimensions.1))),
+        MeshMaterial2d(materials.add(Color::srgb(0., 1., 0.))),
+        Transform::from_xyz(100., -100., 0.),
         RigidBody::Static,
         Collider::rectangle(dimensions.0, dimensions.1),
     ));
