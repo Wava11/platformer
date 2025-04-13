@@ -38,8 +38,10 @@ fn move_playable(
         for mut velocity in query.iter_mut() {
             match event {
                 MovementEvent::Move(direction) => {
-                    let next_velocity = velocity.x + direction * MOVE_SPEED * time.delta_secs();
-                    if velocity.x.abs() < MAX_X_SPEED {
+                    println!("direction: {direction}");
+                    // let next_velocity = velocity.x + direction * MOVE_SPEED * time.delta_secs();
+                    let next_velocity = direction * MAX_X_SPEED;
+                    if velocity.x.abs() <= MAX_X_SPEED {
                         velocity.x = next_velocity.clamp(-MAX_X_SPEED, MAX_X_SPEED);
                     }
                 }
@@ -55,7 +57,6 @@ const MAX_X_SPEED: f32 = 200.;
 const JUMP_SPEED: f32 = 10000.;
 const FRICTION: f32 = 10.;
 
-
 #[derive(Event)]
 enum MovementEvent {
     Move(Scalar),
@@ -69,7 +70,9 @@ pub fn spawn_player(mut commands: Commands, assets_server: Res<AssetServer>) {
         // MeshMaterial2d(materials.add(Color::srgb(0., 0., 1.))),
         Sprite::from_image(assets_server.load("player.png")),
         AngularInertia(f32::MAX),
-        Friction::new(0.).with_dynamic_coefficient(FRICTION),
+        Friction::new(0.)
+            .with_dynamic_coefficient(0.)
+            .with_combine_rule(CoefficientCombine::Min),
         Transform::from_xyz(0., 0., 0.),
         RigidBody::Dynamic,
         Collider::rectangle(22., 34.),
